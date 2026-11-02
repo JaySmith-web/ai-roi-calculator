@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automation ROI Calculator</title>
+    <style>
+        :root {
+            --primary: #00ff66;
+            --danger: #ef4444;
+            --bg-dark: #121214;
+            --card-bg: #1a1a1e;
+            --text-light: #ffffff;
+            --text-muted: #a0a0aa;
+            --border: #2a2a32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            background: #222226;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input.has-prefix {
+            padding-left: 55px;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .results-box {
+            background: #222226;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .metric {
+            margin-bottom: 24px;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        #current-cost { color: var(--danger); }
+        #savings-value { color: var(--primary); }
+
+        /* Custom Visual Representation Bars */
+        .visual-bar-container {
+            margin-top: 8px;
+            background: #121214;
+            border-radius: 4px;
+            height: 12px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .visual-bar {
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease, background-color 0.3s;
+        }
+        
+        .bar-danger { background-color: var(--danger); }
+        .bar-success { background-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>AI Automation ROI Calculator</h1>
+            <p>Calculate exactly how much manual tasks cost your business</p>
+        </div>
+
+        <div class="grid">
+            <!-- Inputs Panel -->
+            <div class="inputs-panel">
+                <div class="form-group">
+                    <label for="employees">Number of Employees Doing Manual Tasks</label>
+                    <input type="number" id="employees" value="5" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="hours">Average Manual Hours Spent per Employee / Day</label>
+                    <input type="number" id="hours" value="3" min="0" max="24" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="wage">Average Monthly Salary per Employee</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">GHS</span>
+                        <input type="number" id="wage" class="has-prefix" value="4500" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="efficiency">Estimated AI Efficiency Gain (%)</label>
+                    <input type="number" id="efficiency" value="75" min="1" max="100">
+                </div>
+            </div>
+
+            <!-- Native HTML/CSS Results Display Panel -->
+            <div class="results-box">
+                <div class="metric">
+                    <div class="metric-label">Current Monthly Waste</div>
+                    <div class="metric-value" id="current-cost">GHS 0.00</div>
+                    <div class="visual-bar-container">
+                        <div class="visual-bar bar-danger" id="bar-waste" style="width: 100%;"></div>
+                    </div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-label">Projected Monthly Savings with AI</div>
+                    <div class="metric-value" id="savings-value">GHS 0.00</div>
+                    <div class="visual-bar-container">
+                        <div class="visual-bar bar-success" id="bar-savings" style="width: 75%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputEmployees = document.getElementById('employees');
+        const inputHours = document.getElementById('hours');
+        const inputWage = document.getElementById('wage');
+        const inputEfficiency = document.getElementById('efficiency');
+
+        const displayCurrentCost = document.getElementById('current-cost');
+        const displaySavings = document.getElementById('savings-value');
+        
+        const barWaste = document.getElementById('bar-waste');
+        const barSavings = document.getElementById('bar-savings');
+
+        function calculateROI() {
+            const employees = parseFloat(inputEmployees.value) || 0;
+            const hoursPerDay = parseFloat(inputHours.value) || 0;
+            const monthlySalary = parseFloat(inputWage.value) || 0;
+            const efficiencyGain = (parseFloat(inputEfficiency.value) || 0) / 100;
+
+            // 160 standard working hours in a month
+            const standardMonthlyHours = 160;
+            const hourlyWage = monthlySalary / standardMonthlyHours;
+            const totalManualHoursPerMonth = employees * hoursPerDay * 20;
+
+            const currentMonthlyCost = totalManualHoursPerMonth * hourlyWage;
+            const monthlySavings = currentMonthlyCost * efficiencyGain;
+
+            // Format numbers to Ghanaian New Cedi currency layout
+            displayCurrentCost.innerText = `GHS ${currentMonthlyCost.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            displaySavings.innerText = `GHS ${monthlySavings.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Dynamically resize bars with basic math calculations instead of a heavy library
+            if (currentMonthlyCost > 0) {
+                barWaste.style.width = "100%";
+                barSavings.style.width = `${efficiencyGain * 100}%`;
+            } else {
+                barWaste.style.width = "0%";
+                barSavings.style.width = "0%";
+            }
+        }
+
+        // Attach clean event tracking listeners
+        [inputEmployees, inputHours, inputWage, inputEfficiency].forEach(input => {
+            input.addEventListener('input', calculateROI);
+        });
+
+        // Run calculation instantly on page load
+        calculateROI();
+    </script>
+</body>
+</html>
