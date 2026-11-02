@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Automation ROI Calculator</title>
+    <!-- Chart.js CDN for visual data rendering -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        :root {
+            --primary: #00ff66;
+            --primary-dark: #00cc52;
+            --bg-dark: #121214;
+            --card-bg: #1a1a1e;
+            --text-light: #ffffff;
+            --text-muted: #a0a0aa;
+            --border: #2a2a32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            background: #222226;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 12px 12px 12px;
+            color: var(--text-light);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input.has-prefix {
+            padding-left: 55px;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .results-box {
+            background: #222226;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .metric {
+            margin-bottom: 20px;
+        }
+
+        .metric:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .chart-container {
+            margin-top: 24px;
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>AI Automation ROI Calculator</h1>
+            <p>Calculate exactly how much manual tasks are costing your business</p>
+        </div>
+
+        <div class="grid">
+            <!-- Left Side: Interactive Input Fields -->
+            <div class="inputs-panel">
+                <div class="form-group">
+                    <label for="employees">Number of Employees Doing Manual Tasks</label>
+                    <input type="number" id="employees" value="5" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="hours">Average Manual Hours Spent per Employee / Day</label>
+                    <input type="number" id="hours" value="3" min="0" max="24" step="0.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="wage">Average Monthly Salary per Employee</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">GHS</span>
+                        <input type="number" id="wage" class="has-prefix" value="4500" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="efficiency">Estimated AI Efficiency Gain (%)</label>
+                    <input type="number" id="efficiency" value="75" min="1" max="100">
+                </div>
+            </div>
+
+            <!-- Right Side: Real-Time Results & Chart Layout -->
+            <div class="results-box">
+                <div>
+                    <div class="metric">
+                        <div class="metric-label">Current Monthly Waste</div>
+                        <div class="metric-value" id="current-cost">GHS 0.00</div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-label">Projected Monthly Savings with AI</div>
+                        <div class="metric-value" id="savings-value">GHS 0.00</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="roiChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Element Selectors
+        const inputEmployees = document.getElementById('employees');
+        const inputHours = document.getElementById('hours');
+        const inputWage = document.getElementById('wage');
+        const inputEfficiency = document.getElementById('efficiency');
+
+        const displayCurrentCost = document.getElementById('current-cost');
+        const displaySavings = document.getElementById('savings-value');
+        
+        let roiChart;
+
+        // Core Mathematical Formulas & Calculations
+        function calculateROI() {
+            const employees = parseFloat(inputEmployees.value) || 0;
+            const hoursPerDay = parseFloat(inputHours.value) || 0;
+            const monthlySalary = parseFloat(inputWage.value) || 0;
+            const efficiencyGain = (parseFloat(inputEfficiency.value) || 0) / 100;
+
+            // Step 1: Calculate hourly wage based on a standard 160-hour work month (8 hours * 20 days)
+            const standardMonthlyHours = 160;
+            const hourlyWage = monthlySalary / standardMonthlyHours;
+
+            // Step 2: Calculate total manual hours spent across the team per month (20 working days)
+            const totalManualHoursPerMonth = employees * hoursPerDay * 20;
+
+            // Step 3: Compute current operational cost leaking into manual workflows
+            const currentMonthlyCost = totalManualHoursPerMonth * hourlyWage;
+
+            // Step 4: Compute direct savings based on target automation efficiency thresholds
+            const monthlySavings = currentMonthlyCost * efficiencyGain;
+            const optimizedCost = currentMonthlyCost - monthlySavings;
+
+            // Step 5: Render values cleanly formatted to local currency (GHS)
+            displayCurrentCost.innerText = `GHS ${currentMonthlyCost.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            displaySavings.innerText = `GHS ${monthlySavings.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+            // Step 6: Stream fresh data parameters into the chart object instance
+            updateChart(currentMonthlyCost, optimizedCost);
+        }
+
+        // Initialize and Update Visual Data Charts
+        function updateChart(current, optimized) {
+            const ctx = document.getElementById('roiChart').getContext('2d');
+            
+            if (roiChart) {
+                roiChart.data.datasets[0].data = [current, optimized];
+                roiChart.update();
+            } else {
+                roiChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Manual Cost', 'AI-Optimized Cost'],
+                        datasets: [{
+                            data: [current, optimized],
+                            backgroundColor: ['#ef4444', '#00ff66'],
+                            borderWidth: 0,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { 
+                                grid: { display: false },
+                                ticks: { color: '#a0a0aa' }
+                            },
+                            y: { 
+                                grid: { color: '#2a2a32' },
+                                ticks: { color: '#a0a0aa' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Add Event Listeners for real-time reactivity
