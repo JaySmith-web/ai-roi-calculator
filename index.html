@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Automation ROI Calculator</title>
-    <!-- Chart.js CDN for visual data rendering -->
-    <script src="https://jsdelivr.net"></script>
+    <!-- Fixed: Using the correct UMD script build for seamless browser loading -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary: #00ff66;
@@ -21,7 +21,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         body {
@@ -102,7 +102,7 @@
             background: #222226;
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 12px 12px 12px 12px;
+            padding: 12px;
             color: var(--text-light);
             font-size: 1rem;
             outline: none;
@@ -166,7 +166,6 @@
         </div>
 
         <div class="grid">
-            <!-- Left Side: Interactive Input Fields -->
             <div class="inputs-panel">
                 <div class="form-group">
                     <label for="employees">Number of Employees Doing Manual Tasks</label>
@@ -192,7 +191,6 @@
                 </div>
             </div>
 
-            <!-- Right Side: Real-Time Results & Chart Layout -->
             <div class="results-box">
                 <div>
                     <div class="metric">
@@ -214,7 +212,6 @@
     </div>
 
     <script>
-        // DOM Element Selectors
         const inputEmployees = document.getElementById('employees');
         const inputHours = document.getElementById('hours');
         const inputWage = document.getElementById('wage');
@@ -225,36 +222,26 @@
         
         let roiChart;
 
-        // Core Mathematical Formulas & Calculations
         function calculateROI() {
             const employees = parseFloat(inputEmployees.value) || 0;
             const hoursPerDay = parseFloat(inputHours.value) || 0;
             const monthlySalary = parseFloat(inputWage.value) || 0;
             const efficiencyGain = (parseFloat(inputEfficiency.value) || 0) / 100;
 
-            // Step 1: Calculate hourly wage based on a standard 160-hour work month (8 hours * 20 days)
             const standardMonthlyHours = 160;
             const hourlyWage = monthlySalary / standardMonthlyHours;
-
-            // Step 2: Calculate total manual hours spent across the team per month (20 working days)
             const totalManualHoursPerMonth = employees * hoursPerDay * 20;
 
-            // Step 3: Compute current operational cost leaking into manual workflows
             const currentMonthlyCost = totalManualHoursPerMonth * hourlyWage;
-
-            // Step 4: Compute direct savings based on target automation efficiency thresholds
             const monthlySavings = currentMonthlyCost * efficiencyGain;
             const optimizedCost = currentMonthlyCost - monthlySavings;
 
-            // Step 5: Render values cleanly formatted to local currency (GHS)
             displayCurrentCost.innerText = `GHS ${currentMonthlyCost.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             displaySavings.innerText = `GHS ${monthlySavings.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-            // Step 6: Stream fresh data parameters into the chart object instance
             updateChart(currentMonthlyCost, optimizedCost);
         }
 
-        // Initialize and Update Visual Data Charts
         function updateChart(current, optimized) {
             const ctx = document.getElementById('roiChart').getContext('2d');
             
@@ -294,4 +281,11 @@
             }
         }
 
-        // Add Event Listeners for real-time reactivity
+        [inputEmployees, inputHours, inputWage, inputEfficiency].forEach(input => {
+            input.addEventListener('input', calculateROI);
+        });
+
+        calculateROI();
+    </script>
+</body>
+</html>
